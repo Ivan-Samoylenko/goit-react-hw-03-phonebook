@@ -3,17 +3,34 @@ import { nanoid } from 'nanoid';
 import { ContactForm } from 'components/ContactForm';
 import { Filter } from 'components/Filter';
 import { ContactList } from 'components/ContactList';
+import { localStorageAPI } from 'services';
+
+const CONTACTS_KEY = 'contacts';
 
 export class App extends Component {
   state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
+    contacts: [],
     filter: '',
   };
+
+  componentDidMount() {
+    const contacts = localStorageAPI.load(CONTACTS_KEY);
+
+    if (contacts) {
+      this.setState({
+        contacts: [...contacts],
+      });
+    }
+  }
+
+  componentDidUpdate(_, prevState) {
+    const currentContacts = this.state.contacts;
+    const previousContacts = prevState.contacts;
+
+    if (previousContacts !== currentContacts) {
+      localStorageAPI.save(CONTACTS_KEY, currentContacts);
+    }
+  }
 
   handleSubmit = value => {
     this.setState(state => ({
